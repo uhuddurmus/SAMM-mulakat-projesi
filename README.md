@@ -5,7 +5,10 @@ Map Api Klasörü içinde FrontEnd MapApi içerisinde Backend Mevcut.
 
 MapApi dosyasındaki 
 
+```
 MapApp.sln
+```
+
 
 dosyasına tıklayarak visual studio üzerinden çalıştırabilirsiniz. 
 
