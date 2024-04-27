@@ -148,7 +148,7 @@ const MyMap = () => {
                   </span>
                 </div>
                 <button className="btn btn-danger me-2 text-center" onClick={() => handleRemove(nav.id)}>
-                  Delete
+                  Sil
                 </button>
                 <hr />
               </div>
@@ -156,7 +156,7 @@ const MyMap = () => {
           </div>
           <div className="float-end">
             <button className="btn btn-primary" onClick={handleDownload}>
-              Download JSON File
+            İndir
             </button>
           </div>
         </div>

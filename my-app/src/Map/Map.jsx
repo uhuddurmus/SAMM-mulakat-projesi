@@ -219,7 +219,7 @@ const Map = () => {
           {/* Button to save current location coordinates */}
           <div className="d-flex justify-content-center mt-1">
             <button className="btn btn-success" onClick={saveCoordinates}>
-              Save Coordinates
+            Noktayı Kaydet
             </button>
           </div>
         </div>
@@ -252,9 +252,9 @@ const Map = () => {
             ))}
           </div>
           {/* Button to download JSON file */}
-          <div className="float-end">
+          <div className="float-end mt-1">
             <button className="btn btn-primary" onClick={handleDownload}>
-              Download JSON File
+              İndir
             </button>
           </div>
         </div>
