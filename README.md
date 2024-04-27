@@ -8,22 +8,18 @@ MapApi dosyasındaki sln dosyasına tıklayarak visual studio üzerinden çalı�
 
 My-App i klonladığız dizine gidip öncelikle 
 
-````
 ```
 npm i
 
 ```
-````
 
 
 ile node paketlerini indirip ardından
 
-````
 ```
 npm start 
 
 ```
-````
 
 ile çalıştırabilirsiniz.
 
