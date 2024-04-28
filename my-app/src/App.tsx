@@ -1,6 +1,5 @@
 import React from "react";
 import logo from "./siteadi_og.png";
-import "./App.css";
 import MyMap from "./MyMap/MyMap";
 import {
   BrowserRouter as Router,

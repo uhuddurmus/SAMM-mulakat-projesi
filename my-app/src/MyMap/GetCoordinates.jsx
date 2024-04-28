@@ -1,32 +1,15 @@
-import React, { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
 import { useDispatch } from "react-redux";
-import { setList } from "../redux/features/listSlice";
-import axios from "axios";
+import { addItem } from "../redux/Slices/listSlice";
 
-const GetCoordinates: React.FC = () => {
+const GetCoordinates = () => {
   const dispatch = useDispatch();
   const map = useMap();
-  const [browserCoords, setBrowserCoords] = useState<any>();
 
-  async function newData(pointData: any) {
-    try {
-      if (pointData.lat.toString().length > 1 && pointData.lng.toString().length > 1) {
-        const response = await axios.post("https://localhost:7009/api/Points", pointData, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        console.log(response);
-        dispatch(setList(response.data));
-      } else {
-        return 0;
-      }
-    } catch (error: any) {
-      console.error("Failed Fetch Data:", error);
-      return 0;
-    }
+  async function newData(pointData) {
+    dispatch(addItem(pointData));
   }
 
   useEffect(() => {
@@ -46,7 +29,7 @@ const GetCoordinates: React.FC = () => {
     const control = new positionControl();
     map.addControl(control);
 
-    map.on("click", (e: any) => {
+    map.on("click", (e) => {
       info.textContent = `Latitude: ${e.latlng.lat}, Longitude: ${e.latlng.lng}`;
 
       newData({
@@ -61,7 +44,6 @@ const GetCoordinates: React.FC = () => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          setBrowserCoords([latitude, longitude]);
           map.setView([latitude, longitude], map.getZoom());
         },
         (error) => {

@@ -1,8 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
-import rootReducer from "./rootReducer";
+import listReducer from "./Slices/listSlice";
 
 const store = configureStore({
-  reducer: rootReducer,
+  reducer: listReducer,
 });
 
 export default store;

@@ -1,10 +1,9 @@
-import React, { useEffect, useState,useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
-import { setList } from "../redux/features/listSlice";
-import { fetchNavsData } from "../redux/actions";
+import { addItem, deleteItem, getList } from "../redux/Slices/listSlice";
 import "./coordinates-of-the-center-of-the-visible-map.css";
 
 // Leaflet tile layer configuration
@@ -17,31 +16,21 @@ const tileLayer = {
 // Map component
 const Map = () => {
   const dispatch = useDispatch();
-  const List = useSelector((state) => state.list.items);
-  const [navs, setNavs] = useState(List);
+  const List = useSelector((state) => state.items);
   const [selected, setSelected] = useState();
-
-  // Fetch marker data from Redux store
-  const fetchData = async () => {
-    try {
-      const response = await fetchNavsData();
-      setNavs(response);
-    } catch (error) {
-      console.error("Failed to fetch data:", error);
-    }
-  };
-
-  // Fetch data on component mount or when marker list changes
   useEffect(() => {
-    fetchData();
-  }, [List]);
+    dispatch(getList());
+  }, []);
 
   // Download JSON file handler
   const handleDownload = async () => {
     try {
-      const response = await axios.get("https://localhost:7009/api/Points/DownloadJsonFile", {
-        responseType: "blob",
-      });
+      const response = await axios.get(
+        "https://localhost:7009/api/Points/DownloadJsonFile",
+        {
+          responseType: "blob",
+        }
+      );
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -60,18 +49,7 @@ const Map = () => {
 
   // Handle marker removal
   const handleRemove = async (navId) => {
-    try {
-      const response = await axios.delete(`https://localhost:7009/api/Points/${navId}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-      });
-      dispatch(setList(response.data));
-      console.log("Point deleted successfully:", response);
-    } catch (error) {
-      console.error("Error deleting point:", error);
-    }
+    dispatch(deleteItem(navId));
   };
 
   // Custom marker component
@@ -140,7 +118,9 @@ const Map = () => {
           lng: lng,
           dateTime: "2024-04-26T20:31:14.058Z",
         });
-        div.innerHTML = `center: ${lat.toFixed(5)}, ${lng.toFixed(5)} | zoom: ${zoom}`;
+        div.innerHTML = `center: ${lat.toFixed(5)}, ${lng.toFixed(
+          5
+        )} | zoom: ${zoom}`;
 
         return div;
       };
@@ -152,7 +132,9 @@ const Map = () => {
       const updateCoordinates = () => {
         const { lat, lng } = map.getCenter();
         const zoom = map.getZoom();
-        div.innerHTML = `center: ${lat.toFixed(5)}, ${lng.toFixed(5)} | zoom: ${zoom}`;
+        div.innerHTML = `center: ${lat.toFixed(5)}, ${lng.toFixed(
+          5
+        )} | zoom: ${zoom}`;
       };
 
       // Event listeners for drag and zoom events
@@ -167,31 +149,9 @@ const Map = () => {
 
     return null;
   };
-
   // Function to save current location coordinates
   const saveCoordinates = async () => {
-    try {
-      if (
-        currentLocation.lat.toString().length > 1 &&
-        currentLocation.lng.toString().length > 1
-      ) {
-        const response = await axios.post(
-          "https://localhost:7009/api/Points",
-          currentLocation,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        dispatch(setList(response.data));
-      } else {
-        return 0;
-      }
-    } catch (error) {
-      console.error("Failed Fetch Data:", error);
-      return 0;
-    }
+    dispatch(addItem(currentLocation));
   };
 
   // Render
@@ -211,7 +171,7 @@ const Map = () => {
               {/* TileLayer for the map */}
               <TileLayer {...tileLayer} />
               {/* Render markers */}
-              <MyMarkers selectedIndex={selected} data={navs} />
+              <MyMarkers selectedIndex={selected} data={List} />
               {/* Component to display and update coordinates */}
               <GetCoordinates />
             </MapContainer>
@@ -219,7 +179,7 @@ const Map = () => {
           {/* Button to save current location coordinates */}
           <div className="d-flex justify-content-center mt-1">
             <button className="btn btn-success" onClick={saveCoordinates}>
-            Noktayı Kaydet
+              Noktayı Kaydet
             </button>
           </div>
         </div>
@@ -229,7 +189,7 @@ const Map = () => {
             className="nav-list mt-2"
             style={{ height: "75vh", overflowY: "scroll" }}
           >
-            {navs?.map((nav) => (
+            {List?.map((nav) => (
               <div key={nav.id} className="nav-item mb-2 text-center">
                 <div
                   className="d-flex justify-content-between align-items-center"
@@ -245,7 +205,7 @@ const Map = () => {
                   className="btn btn-danger me-2 text-center"
                   onClick={() => handleRemove(nav.id)}
                 >
-                  Delete
+                  Sil
                 </button>
                 <hr />
               </div>

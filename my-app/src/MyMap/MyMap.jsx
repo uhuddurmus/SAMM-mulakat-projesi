@@ -1,70 +1,43 @@
 import React, { useEffect, useRef, useState } from "react";
-import { MapContainer, TileLayer, Marker,useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchNavsData } from "../redux/actions";
-import { setList } from "../redux/features/listSlice";
-import GetCoordinates  from "./GetCoordinates";
+import { deleteItem, getList } from "../redux/Slices/listSlice";
+import GetCoordinates from "./GetCoordinates";
 import axios from "axios";
-
-interface PointMarkerProps {
-  center: any;
-  content?: any;
-  openPopup: any;
-}
-
-interface MyMarkersProps {
-  data: any;
-  selectedIndex: any;
-}
 
 const MyMap = () => {
   // Leaflet tile layer
   const tileLayer = {
-    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+    attribution:
+      '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
     url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
   };
 
   // Redux state and dispatch
   const dispatch = useDispatch();
-  const List = useSelector((state: any) => state.list.items);
-  const [navs, setNavs] = useState<any>(List);
+  const List = useSelector((state) => state.items);
 
   // Fetch data from Redux on component mount or list change
-  const fetchData = async () => {
-    try {
-      const response = await fetchNavsData();
-      setNavs(response);
-    } catch (error) {
-      console.error("Failed to fetch data:", error);
-    }
-  };
+
   useEffect(() => {
-    fetchData();
-  }, [List]);
+    dispatch(getList());
+  }, []);
 
   // Handle marker removal
-  const handleRemove = async (navId: any) => {
-    try {
-      const response = await axios.delete(`https://localhost:7009/api/Points/${navId}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-      });
-      dispatch(setList(response.data));
-      console.log("Point deleted successfully:", response);
-    } catch (error) {
-      console.error("Error deleting point:", error);
-    }
+  const handleRemove = async (navId) => {
+    dispatch(deleteItem(navId));
   };
 
   // Handle JSON file download
   const handleDownload = async () => {
     try {
-      const response = await axios.get("https://localhost:7009/api/Points/DownloadJsonFile", {
-        responseType: "blob",
-      });
+      const response = await axios.get(
+        "https://localhost:7009/api/Points/DownloadJsonFile",
+        {
+          responseType: "blob",
+        }
+      );
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -77,9 +50,9 @@ const MyMap = () => {
   };
 
   // Marker component
-  const PointMarker: React.FC<PointMarkerProps> = ({ center, openPopup }) => {
+  const PointMarker = ({ center, openPopup }) => {
     const map = useMap();
-    const markerRef = useRef<any>(null);
+    const markerRef = useRef(null);
 
     useEffect(() => {
       if (openPopup) {
@@ -101,10 +74,10 @@ const MyMap = () => {
   };
 
   // Markers component
-  const MyMarkers: React.FC<MyMarkersProps> = ({ data, selectedIndex }) => {
+  const MyMarkers = ({ data, selectedIndex }) => {
     return (
       <>
-        {data.map((item: any, index: any) => (
+        {data.map((item, index) => (
           <PointMarker
             key={index}
             center={{ lat: item.lat, lng: item.lng }}
@@ -117,7 +90,7 @@ const MyMap = () => {
 
   // Selected marker state and handler
   const [selected, setSelected] = useState();
-  function handleItemClick(index: any) {
+  function handleItemClick(index) {
     setSelected(index);
   }
 
@@ -133,21 +106,31 @@ const MyMap = () => {
             style={{ height: "75vh", width: "100wh" }}
           >
             <TileLayer {...tileLayer} />
-            <MyMarkers selectedIndex={selected} data={navs} />
+            <MyMarkers selectedIndex={selected} data={List} />
             <GetCoordinates />
           </MapContainer>
         </div>
         <div className="col-md-3">
-          <div className="nav-list mt-2" style={{ height: "75vh", overflowY: "scroll" }}>
-            {navs?.map((nav: any) => (
+          <div
+            className="nav-list mt-2"
+            style={{ height: "75vh", overflowY: "scroll" }}
+          >
+            {List?.map((nav) => (
               <div key={nav.id} className="nav-item mb-2 text-center">
-                <div className="d-flex justify-content-between align-items-center" onClick={() => handleItemClick(nav.id)} style={{cursor:'pointer',userSelect:'none'}}>
+                <div
+                  className="d-flex justify-content-between align-items-center"
+                  onClick={() => handleItemClick(nav.id)}
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                >
                   <span>
                     <span className="fw-bolder">Latitude:</span> {nav.lat},{" "}
                     <span className="fw-bolder">Longitude:</span> {nav.lng}
                   </span>
                 </div>
-                <button className="btn btn-danger me-2 text-center" onClick={() => handleRemove(nav.id)}>
+                <button
+                  className="btn btn-danger me-2 text-center"
+                  onClick={() => handleRemove(nav.id)}
+                >
                   Sil
                 </button>
                 <hr />
@@ -155,8 +138,8 @@ const MyMap = () => {
             ))}
           </div>
           <div className="float-end">
-            <button className="btn btn-primary" onClick={handleDownload}>
-            İndir
+            <button className="btn btn-primary mt-1" onClick={handleDownload}>
+              İndir
             </button>
           </div>
         </div>
